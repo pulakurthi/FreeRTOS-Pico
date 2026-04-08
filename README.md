@@ -100,6 +100,8 @@ The CMake build script. Key sections:
 | `add_executable(...)` | Declares the firmware binary and its source files. |
 | `target_include_directories(... include/)` | Tells the compiler where to find `FreeRTOSConfig.h`. |
 | `target_link_libraries(...)` | Links **pico_stdlib** (GPIO, UART, clocks), **FreeRTOS-Kernel** (scheduler, tasks, queues), and **FreeRTOS-Kernel-Heap4** (dynamic memory allocator using `heap_4.c`). |
+| `pico_enable_stdio_usb(... 1)` | Enables USB-based standard I/O (`printf` output over USB serial). |
+| `pico_enable_stdio_uart(... 0)` | Disables UART-based standard I/O. |
 | `pico_add_extra_outputs(...)` | Generates additional output formats including the `.uf2` file used for drag-and-drop flashing. |
 
 ### `FreeRTOSConfig.h`
@@ -154,22 +156,22 @@ Enabled (`configUSE_TIMERS = 1`). The timer service task runs at the highest pri
 | `configMAX_SYSCALL_INTERRUPT_PRIORITY` | 16 (0x10) | ISRs with priority ≥ 0x10 may call `...FromISR()` FreeRTOS APIs. ISRs with priority < 0x10 are "interrupt-safe" but cannot use FreeRTOS calls. |
 | `configENABLE_FPU` | 1 | Enables FPU context save/restore on task switches (Cortex-M33 has an FPU). |
 | `configENABLE_TRUSTZONE` | 0 | TrustZone not used. |
+| `configRUN_FREERTOS_SECURE_ONLY` | 1 | Runs FreeRTOS in secure mode. Must be set to 1 on RP2350, otherwise a silent hard fault occurs. |
 | `configENABLE_MPU` | 0 | Memory Protection Unit not used. |
 
 #### SMP (Symmetric Multiprocessing)
 
-Currently configured for **single-core** operation. The RP2350 has two cores — to use both, uncomment `configNUMBER_OF_CORES` and set it to 2.
+Configured for **single-core** operation (`configNUMBER_OF_CORES = 1`). The RP2350 has two cores — to use both, change it to 2.
 
 ### `main.c`
 
-The application firmware. Currently a simple LED blink loop:
+The application firmware. Blinks the onboard LED using a FreeRTOS task:
 
 | Section | What it does |
 |---------|--------------|
 | `pico_led_init()` | Initializes `PICO_DEFAULT_LED_PIN` as a GPIO output. |
 | `pico_set_led(bool)` | Drives the LED pin high or low. |
-| `main()` | Initializes the LED, then blinks it in a `while(true)` loop with 1 s on / 1 s off. |
+| `vBlinkTask()` | A FreeRTOS task that toggles the LED on and off with `vTaskDelay()` and prints the state over USB serial via `printf`. |
+| `main()` | Initializes USB stdio and the LED, creates the blink task with `xTaskCreate()`, and starts the FreeRTOS scheduler with `vTaskStartScheduler()`. |
 | `vApplicationStackOverflowHook()` | **Required by FreeRTOS** when `configCHECK_FOR_STACK_OVERFLOW` ≥ 1. Called if any task overflows its stack — here it halts the CPU in an infinite loop so the fault is obvious during debugging. |
-
-> **Note:** The current `main()` uses bare `sleep_ms()` delays and does not yet create FreeRTOS tasks. To use the RTOS, you would replace the `while(true)` loop with `xTaskCreate()` calls and start the scheduler with `vTaskStartScheduler()`.
 
