@@ -70,7 +70,7 @@
 #define configMAX_CO_ROUTINE_PRIORITIES              1
 
 /* SMP - single core for now */
-/* #define configNUMBER_OF_CORES                     1 */
+#define configNUMBER_OF_CORES                        1
 #define configRUN_MULTIPLE_PRIORITIES                0
 #define configUSE_CORE_AFFINITY                      0
 #define configUSE_PASSIVE_IDLE_HOOK                  0
@@ -96,11 +96,9 @@
 
 /* RP2350 Cortex-M33 specific - no TrustZone, no MPU */
 #define configENABLE_TRUSTZONE                       0
-#define configRUN_FREERTOS_SECURE_ONLY               0
+#define configRUN_FREERTOS_SECURE_ONLY               1 /* Run FreeRTOS in secure mode else will cause a silent hard fault*/
 #define configENABLE_MPU                             0
 #define configENABLE_FPU                             1
 #define configENABLE_MVE                             0
 
 #endif /* FREERTOS_CONFIG_H */
-
-

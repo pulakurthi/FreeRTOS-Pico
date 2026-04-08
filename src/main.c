@@ -23,15 +23,24 @@ void pico_set_led(bool led_on) {
     gpio_put(PICO_DEFAULT_LED_PIN, led_on);
 }
 
+void vBlinkTask() {
+    for (;;) {
+        pico_set_led(true);
+        printf("LED ON \n");
+        vTaskDelay(LED_DELAY_MS);
+        pico_set_led(false);
+        printf("LED OFF \n");
+        vTaskDelay(LED_DELAY_MS);
+    }
+}
+
+
 int main() {
+    stdio_init_all();
     int rc = pico_led_init();
     hard_assert(rc == PICO_OK);
-    while (true) {
-        pico_set_led(true);
-        sleep_ms(LED_DELAY_MS);
-        pico_set_led(false);
-        sleep_ms(LED_DELAY_MS);
-    }
+    xTaskCreate(vBlinkTask, "Blink Task", 128, NULL, 1, NULL);
+    vTaskStartScheduler();
 }
 
 void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName) {

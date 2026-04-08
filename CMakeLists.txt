@@ -30,4 +30,9 @@ target_link_libraries(FreeRTOS-Pico
     FreeRTOS-Kernel-Heap4
 )
 
-pico_add_extra_outputs(FreeRTOS-Pico)  # generates .uf2 file
+# enable usb output, disable uart output
+pico_enable_stdio_usb(FreeRTOS-Pico 1)
+pico_enable_stdio_uart(FreeRTOS-Pico 0)
+
+# create map/bin/hex/uf2 file etc.
+pico_add_extra_outputs(FreeRTOS-Pico)
