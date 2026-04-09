@@ -2,11 +2,12 @@
 #include <task.h>
 #include <stdio.h>
 #include "pico/stdlib.h"
+#include "queue.h"
 
 
-#ifndef LED_DELAY_MS
 #define LED_DELAY_MS 1000
-#endif
+
+QueueHandle_t blinkQueue;
 
 // Perform initialisation
 int pico_led_init(void) {
@@ -24,13 +25,26 @@ void pico_set_led(bool led_on) {
 }
 
 void vBlinkTask() {
+    int counter = 0;
     for (;;) {
         pico_set_led(true);
-        printf("LED ON \n");
-        vTaskDelay(LED_DELAY_MS);
+        //printf("LED ON \n");
+        vTaskDelay(pdMS_TO_TICKS(LED_DELAY_MS));
         pico_set_led(false);
-        printf("LED OFF \n");
-        vTaskDelay(LED_DELAY_MS);
+        counter++;
+        xQueueSend(blinkQueue, &counter, portMAX_DELAY);
+        //printf("LED OFF \n");
+        vTaskDelay(pdMS_TO_TICKS(LED_DELAY_MS));
+    }
+}
+
+void vBlinkCount() {
+    int counter;
+    for (;;) {
+        if(xQueueReceive(blinkQueue, &counter, portMAX_DELAY) ==  pdPASS)
+        {
+            printf("LED Blinked %d Times.\n", counter);
+        }
     }
 }
 
@@ -39,6 +53,8 @@ int main() {
     stdio_init_all();
     int rc = pico_led_init();
     hard_assert(rc == PICO_OK);
-    xTaskCreate(vBlinkTask, "Blink Task", 128, NULL, 1, NULL);
+    blinkQueue = xQueueCreate(1, sizeof(int));
+    xTaskCreate(vBlinkTask, "Blink Task", 256, NULL, 1, NULL);
+    xTaskCreate(vBlinkCount, "Blink Count", 256, NULL, 1, NULL);
     vTaskStartScheduler();
 }
