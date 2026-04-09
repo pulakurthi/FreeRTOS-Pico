@@ -42,9 +42,3 @@ int main() {
     xTaskCreate(vBlinkTask, "Blink Task", 128, NULL, 1, NULL);
     vTaskStartScheduler();
 }
-
-void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName) {
-    (void)xTask;
-    (void)pcTaskName;
-    for (;;);  // halt on stack overflow
-}

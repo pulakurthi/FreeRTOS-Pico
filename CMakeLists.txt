@@ -6,10 +6,10 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(PICO_BOARD pico2 CACHE STRING "Board type")
 
-# Pull in the Pico SDK (must be before project())
+# copy from raspberrypi rtos kernal FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2350_ARM_NTZ/
 include(pico_sdk_import.cmake)
 
-# Pull in FreeRTOS Kernel (must be before project() for SDK <= 1.3.1)
+# copy from raspberrypi rtos kernal FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2350_ARM_NTZ/
 include(FreeRTOS_Kernel_import.cmake)
 
 project(FreeRTOS-Pico C CXX ASM)
@@ -17,11 +17,13 @@ project(FreeRTOS-Pico C CXX ASM)
 pico_sdk_init()
 
 add_executable(FreeRTOS-Pico
+    lib/src/memory.c
     src/main.c
 )
 
 target_include_directories(FreeRTOS-Pico PRIVATE
     include/
+    lib/include
 ) # for FreeRTOSConfig.h
 
 target_link_libraries(FreeRTOS-Pico
