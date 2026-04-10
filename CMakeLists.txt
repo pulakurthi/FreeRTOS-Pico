@@ -28,6 +28,7 @@ target_include_directories(FreeRTOS-Pico PRIVATE
 
 target_link_libraries(FreeRTOS-Pico
     pico_stdlib
+    hardware_gpio
     FreeRTOS-Kernel
     FreeRTOS-Kernel-Heap4
 )
